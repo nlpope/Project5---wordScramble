@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		40AC76EB2C67FD1700B15DBB /* start.txt in Resources */ = {isa = PBXBuildFile; fileRef = 40AC76EA2C67FD1700B15DBB /* start.txt */; };
 		40D21F722C67F5EE0011F430 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D21F712C67F5EE0011F430 /* AppDelegate.swift */; };
 		40D21F742C67F5EE0011F430 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D21F732C67F5EE0011F430 /* SceneDelegate.swift */; };
 		40D21F762C67F5EE0011F430 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D21F752C67F5EE0011F430 /* ViewController.swift */; };
@@ -17,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		40AC76EA2C67FD1700B15DBB /* start.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = start.txt; sourceTree = "<group>"; };
 		40D21F6E2C67F5EE0011F430 /* Project5.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Project5.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		40D21F712C67F5EE0011F430 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		40D21F732C67F5EE0011F430 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -63,6 +65,7 @@
 				40D21F752C67F5EE0011F430 /* ViewController.swift */,
 				40D21F772C67F5EE0011F430 /* Main.storyboard */,
 				40D21F7D2C67F5F70011F430 /* Assets.xcassets */,
+				40AC76EA2C67FD1700B15DBB /* start.txt */,
 				40D21F7F2C67F5F70011F430 /* LaunchScreen.storyboard */,
 				40D21F822C67F5F70011F430 /* Info.plist */,
 				40D21F7A2C67F5EE0011F430 /* Project5.xcdatamodeld */,
@@ -129,6 +132,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				40D21F7E2C67F5F70011F430 /* Assets.xcassets in Resources */,
+				40AC76EB2C67FD1700B15DBB /* start.txt in Resources */,
 				40D21F812C67F5F70011F430 /* Base in Resources */,
 				40D21F792C67F5EE0011F430 /* Base in Resources */,
 			);
