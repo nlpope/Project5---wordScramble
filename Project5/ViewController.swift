@@ -1,6 +1,6 @@
 //
 //  ViewController.swift
-//  Project5
+//  Project5 - anagram game
 //
 //  Created by Noah Pope on 8/10/24.
 //
@@ -8,15 +8,29 @@
 import UIKit
 
 class ViewController: UITableViewController {
+    
+    enum Keys {
+        static let currentWord  = "currentWord"
+        static let usedWords    = "usedWords"
+        static let loadFromSave = "loadFromSave"
+    }
 
     var allWords    = [String]()
     var usedWords   = [String]()
+    var loadGame    = false
+    var currentWord = "" {
+        didSet {
+            saveCurrentWordAndAnswers()
+            loadGame    = true
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configureNavigation()
         configureArray()
-        startGame()
+        loadGame ? loadCurrentWordAndAnswers() : startGame()
+        presentInstructions()
     }
     
     
@@ -39,9 +53,18 @@ class ViewController: UITableViewController {
     
     
     func startGame() {
-        title = allWords.randomElement()
+        title       = allWords.randomElement()
         usedWords.removeAll(keepingCapacity: true)
         tableView.reloadData()
+        saveCurrentWordAndAnswers()
+    }
+    
+    
+    func presentInstructions() {
+        let message = "This is an anagram game. Try and spell as many words as you can using the letters from the word above, used words will be listed as you progress."
+        let ac      = UIAlertController(title: "Instructions", message: message, preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "Ok", style: .default))
+        present(ac, animated: true)
     }
     
     
@@ -107,6 +130,48 @@ class ViewController: UITableViewController {
     }
     
     
+    func saveLoadStatus() {
+        let jsonEncoder     = JSONEncoder()
+        if let savedData    = try? jsonEncoder.encode(loadGame)
+    }
+    
+    
+    func saveCurrentWordAndAnswers() {
+        #warning("set loadgame status to true here?")
+        let defaults            = UserDefaults.standard
+        let jsonEncoder         = JSONEncoder()
+        if let savedCurrentWord = try? jsonEncoder.encode(currentWord) {
+            defaults.setValue(savedCurrentWord, forKey: Keys.currentWord)
+        } else {
+            print("unable to save current word")
+        }
+        
+        if let savedAnswers     = try? jsonEncoder.encode(usedWords) {
+            defaults.setValue(savedAnswers, forKey: Keys.usedWords)
+        } else {
+            print("unable to save usedwords")
+        }
+    }
+    
+    
+    func loadSaveStatus() {
+        let defaults        = UserDefaults.standard
+        if let savedData    = defaults.object(forKey: Keys.loadFromSave) as? Data {
+            let jsonDecoder = JSONDecoder()
+            do {
+                loadGame = try jsonDecoder.decode(Bool.self, from: savedData)
+            } catch {
+                print("unable to load save status")
+            }
+        }
+    }
+    
+    
+    func loadCurrentWordAndAnswers() {
+        
+    }
+    
+    
     @objc func promptForAnswer() {
         let ac = UIAlertController(title: "Enter answer", message: nil, preferredStyle: .alert)
         ac.addTextField()
@@ -122,7 +187,10 @@ class ViewController: UITableViewController {
     }
     
     
-    @objc func restartGame() { startGame() }
+    @objc func restartGame() {
+        loadGame = false
+        startGame()
+    }
 }
 
 
