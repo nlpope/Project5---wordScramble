@@ -12,13 +12,13 @@
 					<key>EndingColumnNumber</key>
 					<string>0</string>
 					<key>EndingLineNumber</key>
-					<string>133</string>
+					<string>139</string>
 					<key>StartingColumnNumber</key>
 					<string>0</string>
 					<key>StartingLineNumber</key>
-					<string>132</string>
+					<string>138</string>
 					<key>Timestamp</key>
-					<string>749162876.985745</string>
+					<string>749194384.243866</string>
 				</dict>
 				<key>rebasable-url</key>
 				<dict>
@@ -41,9 +41,9 @@
     
 </string>
 				<key>trailing</key>
-				<string>        let jsonEncoder     = JSONEncoder()
-        if let savedData    = try? jsonEncoder.encode(loadGame)
-    }
+				<string>        let jsonEncoder             = JSONEncoder()
+        if let savedLoadStatus      = try? jsonEncoder.encode(loadGame) {
+            let defaults                = UserDefaults.standard
 </string>
 			</dict>
 			<key>title</key>

@@ -17,20 +17,19 @@ class ViewController: UITableViewController {
 
     var allWords    = [String]()
     var usedWords   = [String]()
-    var loadGame    = false
+    var loadGame    = true
     var currentWord = "" {
-        didSet {
-            saveCurrentWordAndAnswers()
-            loadGame    = true
-        }
+        didSet { saveCurrentWordAndAnswers() }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configureNavigation()
         configureArray()
-        loadGame ? loadCurrentWordAndAnswers() : startGame()
-        presentInstructions()
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.loadSaveStatus()
+        }
+        startGame()
     }
     
     
@@ -42,7 +41,6 @@ class ViewController: UITableViewController {
     
     func configureArray() {
         if let startWordsURL = Bundle.main.url(forResource: "start", withExtension: "txt") {
-            print("test print startwordsURL: \(startWordsURL)")
             if let startWords = try? String(contentsOf: startWordsURL) {
                 allWords = startWords.components(separatedBy: "\n")
             }
@@ -53,10 +51,17 @@ class ViewController: UITableViewController {
     
     
     func startGame() {
+        guard !loadGame  else {
+            loadCurrentWordAndAnswers()
+            presentInstructions()
+            return
+        }
         title       = allWords.randomElement()
         usedWords.removeAll(keepingCapacity: true)
         tableView.reloadData()
-        saveCurrentWordAndAnswers()
+        currentWord = title!
+        saveLoadStatus()
+        presentInstructions()
     }
     
     
@@ -102,6 +107,7 @@ class ViewController: UITableViewController {
         usedWords.insert(lowerAnswer, at: 0)
         let indexPath = IndexPath(row: 0, section: 0)
         tableView.insertRows(at: [indexPath], with: .automatic)
+        saveCurrentWordAndAnswers()
     }
     
     
@@ -131,35 +137,43 @@ class ViewController: UITableViewController {
     
     
     func saveLoadStatus() {
-        let jsonEncoder     = JSONEncoder()
-        if let savedData    = try? jsonEncoder.encode(loadGame)
+        let jsonEncoder             = JSONEncoder()
+        if let savedLoadStatus      = try? jsonEncoder.encode(loadGame) {
+            let defaults                = UserDefaults.standard
+            defaults.setValue(savedLoadStatus, forKey: Keys.loadFromSave)
+            print("load status saved")
+        } else {
+            print("unable to save load status")
+        }
     }
     
     
     func saveCurrentWordAndAnswers() {
-        #warning("set loadgame status to true here?")
         let defaults            = UserDefaults.standard
         let jsonEncoder         = JSONEncoder()
         if let savedCurrentWord = try? jsonEncoder.encode(currentWord) {
             defaults.setValue(savedCurrentWord, forKey: Keys.currentWord)
+            print("saved current word = \(currentWord)")
         } else {
             print("unable to save current word")
         }
         
-        if let savedAnswers     = try? jsonEncoder.encode(usedWords) {
-            defaults.setValue(savedAnswers, forKey: Keys.usedWords)
+        if let savedUsedWords     = try? jsonEncoder.encode(usedWords) {
+            defaults.setValue(savedUsedWords, forKey: Keys.usedWords)
+            print("saved used words = \(usedWords)")
         } else {
             print("unable to save usedwords")
         }
     }
     
-    
+    #warning("problem child")
     func loadSaveStatus() {
         let defaults        = UserDefaults.standard
         if let savedData    = defaults.object(forKey: Keys.loadFromSave) as? Data {
             let jsonDecoder = JSONDecoder()
             do {
-                loadGame = try jsonDecoder.decode(Bool.self, from: savedData)
+                loadGame    = try jsonDecoder.decode(Bool.self, from: savedData)
+                print("loadGame's value = \(loadGame)")
             } catch {
                 print("unable to load save status")
             }
@@ -168,7 +182,27 @@ class ViewController: UITableViewController {
     
     
     func loadCurrentWordAndAnswers() {
+        let defaults        = UserDefaults.standard
+        if let savedData    = defaults.object(forKey: Keys.currentWord) as? Data {
+            let jsonDecoder = JSONDecoder()
+            do {
+                currentWord = try jsonDecoder.decode(String.self, from: savedData)
+                title       = currentWord
+            } catch {
+                print("unable to load current word")
+            }
+        }
         
+        if let savedData    = defaults.object(forKey: Keys.usedWords) as? Data {
+            let jsonDecoder = JSONDecoder()
+            do {
+                usedWords = try jsonDecoder.decode([String].self, from: savedData)
+            } catch {
+                print("unable to load current word")
+            }
+        }
+         
+        tableView.reloadData()
     }
     
     
@@ -189,6 +223,7 @@ class ViewController: UITableViewController {
     
     @objc func restartGame() {
         loadGame = false
+        saveLoadStatus()
         startGame()
     }
 }
