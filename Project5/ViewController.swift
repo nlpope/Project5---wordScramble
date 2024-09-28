@@ -17,66 +17,40 @@ class ViewController: UITableViewController {
 
     var allWords    = [String]()
     var usedWords   = [String]()
-    var loadGame    = true
+    var loadGame    = false {
+        didSet { encodeLoadStatus() }
+    }
     var currentWord = "" {
-        didSet { saveCurrentWordAndAnswers() }
+        didSet { loadGame = true }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configureNavigation()
         configureArray()
-        DispatchQueue.global(qos: .userInitiated).async {
-            self.loadSaveStatus()
-        }
         startGame()
     }
     
     
-    func configureNavigation() {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(promptForAnswer))
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(restartGame))
-    }
-    
-    
-    func configureArray() {
-        if let startWordsURL = Bundle.main.url(forResource: "start", withExtension: "txt") {
-            if let startWords = try? String(contentsOf: startWordsURL) {
-                allWords = startWords.components(separatedBy: "\n")
-            }
-        }
-        
-        if allWords.isEmpty { allWords = ["silkworm"] }
-    }
-    
-    
     func startGame() {
-        guard !loadGame  else {
+        decodeLoadStatus()
+        if loadGame {
             loadCurrentWordAndAnswers()
-            presentInstructions()
             return
         }
         title       = allWords.randomElement()
         usedWords.removeAll(keepingCapacity: true)
         tableView.reloadData()
         currentWord = title!
-        saveLoadStatus()
+        saveCurrentWordAndAnswers()
+        //savecurrentwordandanswers()?
         presentInstructions()
     }
     
     
-    func presentInstructions() {
-        let message = "This is an anagram game. Try and spell as many words as you can using the letters from the word above, used words will be listed as you progress."
-        let ac      = UIAlertController(title: "Instructions", message: message, preferredStyle: .alert)
-        ac.addAction(UIAlertAction(title: "Ok", style: .default))
-        present(ac, animated: true)
-    }
-    
-    
-    func presentError(title: String, message: String) {
-        let ac = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        ac.addAction(UIAlertAction(title: "Ok", style: .default))
-        present(ac, animated: true)
+    @objc func restartGame() {
+        loadGame = false
+        startGame()
     }
     
     
@@ -111,6 +85,117 @@ class ViewController: UITableViewController {
     }
     
     
+    func encodeLoadStatus() {
+        let jsonEncoder             = JSONEncoder()
+        if let encodedLoadStatus    = try? jsonEncoder.encode(loadGame) {
+            let defaults            = UserDefaults.standard
+            defaults.set(encodedLoadStatus, forKey: Keys.loadFromSave)
+            print("encoded load status = \(loadGame)")
+        } else {
+            print("unable to encode load status")
+        }
+    }
+    
+    
+    func decodeLoadStatus() {
+        let defaults                = UserDefaults.standard
+        
+        if let encodedLoadStatus    = defaults.object(forKey: Keys.loadFromSave) as? Data {
+            let jsonDecoder         = JSONDecoder()
+            do {
+                loadGame            = try jsonDecoder.decode(Bool.self, from: encodedLoadStatus)
+                print("decoded load status = \(loadGame)")
+            } catch {
+                print("failed to load current word")
+            }
+        }
+    }
+    
+    
+    func saveCurrentWordAndAnswers() {
+        let jsonEncoder                 = JSONEncoder()
+        if let encodedCurrentWord       = try? jsonEncoder.encode(currentWord) {
+            let defaults                = UserDefaults.standard
+            defaults.set(encodedCurrentWord, forKey: Keys.currentWord)
+            print("savedCurrentWord = \(currentWord)")
+        } else {
+            print("unable to save current word")
+        }
+        
+        if let encodedUsedWords         = try? jsonEncoder.encode(usedWords) {
+            let defaults                = UserDefaults.standard
+            defaults.set(encodedUsedWords, forKey: Keys.usedWords)
+            print("savedusedwords = \(encodedUsedWords)")
+            print("savedusedwords = \(usedWords)")
+        } else {
+            print("unable to save usedwords")
+        }
+    }
+    
+    
+    func loadCurrentWordAndAnswers() {
+        let defaults                = UserDefaults.standard
+        
+        if let encodedCurrentWord   = defaults.object(forKey: Keys.currentWord) as? Data {
+            let jsonDecoder         = JSONDecoder()
+            do {
+                #warning("didset is causing a save of an empty usedwords array")
+                title               = try jsonDecoder.decode(String.self, from: encodedCurrentWord)
+                currentWord         = title!
+                print("loaded current word = \(currentWord)")
+            } catch {
+                print("failed to load current word")
+            }
+        }
+        
+        if let encodedUsedWords     = defaults.object(forKey: Keys.usedWords) as? Data {
+            let jsonDecoder         = JSONDecoder()
+            do {
+                usedWords           = try jsonDecoder.decode([String].self, from: encodedUsedWords)
+                print("loaded used words = \(usedWords)")
+            } catch {
+                print("failed to load used word")
+            }
+        }
+    }
+    
+    
+    // MARK: END OF PROBLEM CHILD
+    func configureNavigation() {
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(promptForAnswer))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(restartGame))
+    }
+    
+    
+    func configureArray() {
+        if let startWordsURL = Bundle.main.url(forResource: "start", withExtension: "txt") {
+            if let startWords = try? String(contentsOf: startWordsURL) {
+                allWords = startWords.components(separatedBy: "\n")
+            }
+        }
+        
+        if allWords.isEmpty { allWords = ["silkworm"] }
+    }
+    
+    
+    func presentInstructions() {
+        let message = "This is an anagram game. Try and spell as many words as you can using the letters from the word above, used words will be listed as you progress."
+        let ac      = UIAlertController(title: "Instructions", message: message, preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "Ok", style: .default))
+        present(ac, animated: true)
+    }
+    
+    
+    func presentError(title: String, message: String) {
+        let ac = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "Ok", style: .default))
+        present(ac, animated: true)
+    }
+    
+    
+   
+    
+    
     func isOriginal(word: String) -> Bool { return !usedWords.contains(word) }
 
     
@@ -136,74 +221,9 @@ class ViewController: UITableViewController {
     }
     
     
-    func saveLoadStatus() {
-        let jsonEncoder             = JSONEncoder()
-        if let savedLoadStatus      = try? jsonEncoder.encode(loadGame) {
-            let defaults                = UserDefaults.standard
-            defaults.setValue(savedLoadStatus, forKey: Keys.loadFromSave)
-            print("load status saved")
-        } else {
-            print("unable to save load status")
-        }
-    }
+  
     
-    
-    func saveCurrentWordAndAnswers() {
-        let defaults            = UserDefaults.standard
-        let jsonEncoder         = JSONEncoder()
-        if let savedCurrentWord = try? jsonEncoder.encode(currentWord) {
-            defaults.setValue(savedCurrentWord, forKey: Keys.currentWord)
-            print("saved current word = \(currentWord)")
-        } else {
-            print("unable to save current word")
-        }
-        
-        if let savedUsedWords     = try? jsonEncoder.encode(usedWords) {
-            defaults.setValue(savedUsedWords, forKey: Keys.usedWords)
-            print("saved used words = \(usedWords)")
-        } else {
-            print("unable to save usedwords")
-        }
-    }
-    
-    #warning("problem child")
-    func loadSaveStatus() {
-        let defaults        = UserDefaults.standard
-        if let savedData    = defaults.object(forKey: Keys.loadFromSave) as? Data {
-            let jsonDecoder = JSONDecoder()
-            do {
-                loadGame    = try jsonDecoder.decode(Bool.self, from: savedData)
-                print("loadGame's value = \(loadGame)")
-            } catch {
-                print("unable to load save status")
-            }
-        }
-    }
-    
-    
-    func loadCurrentWordAndAnswers() {
-        let defaults        = UserDefaults.standard
-        if let savedData    = defaults.object(forKey: Keys.currentWord) as? Data {
-            let jsonDecoder = JSONDecoder()
-            do {
-                currentWord = try jsonDecoder.decode(String.self, from: savedData)
-                title       = currentWord
-            } catch {
-                print("unable to load current word")
-            }
-        }
-        
-        if let savedData    = defaults.object(forKey: Keys.usedWords) as? Data {
-            let jsonDecoder = JSONDecoder()
-            do {
-                usedWords = try jsonDecoder.decode([String].self, from: savedData)
-            } catch {
-                print("unable to load current word")
-            }
-        }
-         
-        tableView.reloadData()
-    }
+   
     
     
     @objc func promptForAnswer() {
@@ -221,11 +241,7 @@ class ViewController: UITableViewController {
     }
     
     
-    @objc func restartGame() {
-        loadGame = false
-        saveLoadStatus()
-        startGame()
-    }
+   
 }
 
 

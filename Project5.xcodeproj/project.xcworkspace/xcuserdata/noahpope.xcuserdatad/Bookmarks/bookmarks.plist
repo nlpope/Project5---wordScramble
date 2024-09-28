@@ -12,13 +12,13 @@
 					<key>EndingColumnNumber</key>
 					<string>0</string>
 					<key>EndingLineNumber</key>
-					<string>139</string>
+					<string>221</string>
 					<key>StartingColumnNumber</key>
 					<string>0</string>
 					<key>StartingLineNumber</key>
-					<string>138</string>
+					<string>220</string>
 					<key>Timestamp</key>
-					<string>749194384.243866</string>
+					<string>749235844.173828</string>
 				</dict>
 				<key>rebasable-url</key>
 				<dict>
@@ -34,16 +34,16 @@
 			<key>text-context</key>
 			<dict>
 				<key>focused</key>
-				<string>    func saveLoadStatus() {
+				<string>    }
 </string>
 				<key>leading</key>
-				<string>    
-    
+				<string>        
+        return misspelledRange.location == NSNotFound
 </string>
 				<key>trailing</key>
-				<string>        let jsonEncoder             = JSONEncoder()
-        if let savedLoadStatus      = try? jsonEncoder.encode(loadGame) {
-            let defaults                = UserDefaults.standard
+				<string>    
+    
+  
 </string>
 			</dict>
 			<key>title</key>
