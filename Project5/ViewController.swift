@@ -1,6 +1,6 @@
 //
 //  ViewController.swift
-//  Project5 - anagram game
+//  Project5 - word scramble anagram game
 //
 //  Created by Noah Pope on 8/10/24.
 //
